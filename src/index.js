@@ -1,8 +1,15 @@
 require("@mapd/mapdc/mapdc.css")
+require("../styles/chart.css")
+
 import * as dc from "@mapd/mapdc"
+import {xDomainExtract} from "./lifecycle/utils"
+import updateDimension from "./lifecycle/update-dimension"
+import updateTimeBin from "./lifecycle/update-bin"
 
 var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) - 50
 var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 200
+
+let CF = null
 
 function connect () {
   const connection = new MapdCon()
@@ -27,12 +34,12 @@ function createCrossfilter (connector) {
 function minMax (cf, column) {
   return cf.groupAll().reduceMulti([
     {
-      expression: "dep_timestamp",
+      expression: column,
       agg_mode:"min",
       name: "minimum"
     },
     {
-      expression: "dep_timestamp",
+      expression: column,
       agg_mode:"max",
       name: "maximum"
     }
@@ -54,6 +61,7 @@ function init (cf) {
 }
 
 function lines ({cf, bounds}) {
+  CF = cf
   var timeChartDimension = cf.dimension("dep_timestamp");
       var rangeChartDimension = timeChartDimension
 
@@ -93,6 +101,10 @@ function lines ({cf, bounds}) {
            extract: true
          }, null])
 
+      focusChart.updateDimension = updateDimension.bind(focusChart)
+      focusChart.updateTimeBin = updateTimeBin.bind(focusChart)
+
+      focusChart.crossfilter = () => cf
       var rangeChart = dc.lineChart('.chart4-example')
         .width(w)
         .height((h/2.5)/2)
@@ -127,8 +139,50 @@ function lines ({cf, bounds}) {
       focusChart.rangeChart(rangeChart)
 }
 
+window.dc = dc
+
+function setupListeners () {
+  const datetruncSelection = document.getElementById("datetrunc")
+  const extractSelection = document.getElementById("extract")
+  const chartSelection = document.getElementById("chart")
+  const dimensionSelection = document.getElementById("dimension")
+
+  datetruncSelection.addEventListener("change", () => {
+    const focus = dc.chartRegistry.list()[1]
+    const extent = focus.group().binParams()[0].binBounds
+    focus.updateTimeBin({
+      type: "datetrunc",
+      unit: datetruncSelection.value
+    }, extent)
+  })
+
+  extractSelection.addEventListener("change", () => {
+    const focus = dc.chartRegistry.list()[1]
+    const extent = focus.group().binParams()[0].binBounds
+    focus.updateTimeBin({
+      type: "extract",
+      unit: extractSelection.value
+    }, extent)
+
+  })
+
+  chartSelection.addEventListener("change", () => {
+    console.log(chartSelection.value)
+  })
+
+  dimensionSelection.addEventListener("change", () => {
+    const field = dimensionSelection.value
+    return minMax(CF, field)
+      .then((bounds) => {
+        const focus = dc.chartRegistry.list()[1]
+        focus.updateDimension(field,[bounds.minimum, bounds.maximum] )
+      })
+  })
+}
+
 connect()
   .then(createCrossfilter)
   .then(init)
   .then(lines)
   .then(dc.renderAllAsync)
+  .then(setupListeners)
