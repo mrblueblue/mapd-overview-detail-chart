@@ -22,7 +22,8 @@ module.exports = {
         loader: "babel-loader",
         include: [
           path.resolve(__dirname, "src"),
-          path.resolve(__dirname, "node_modules/@mapd/mapdc")
+          path.resolve(__dirname, "lib/charting/src"),
+          path.resolve(__dirname, "lib/charting/node_modules/@mapd/mapd-draw")
         ]
       },
       {

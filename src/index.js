@@ -1,7 +1,7 @@
-require("@mapd/mapdc/mapdc.css")
+require("../lib/charting/mapdc.css")
 require("../styles/chart.css")
 
-import * as dc from "@mapd/mapdc"
+import * as dc from "../lib/charting/src/index"
 import {xDomainExtract} from "./lifecycle/utils"
 import updateDimension from "./lifecycle/update-dimension"
 import updateTimeBin from "./lifecycle/update-bin"

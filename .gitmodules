@@ -1,0 +1,3 @@
+[submodule "lib/charting"]
+	path = lib/charting
+	url = git@github.com:mapd/mapd-charting.git

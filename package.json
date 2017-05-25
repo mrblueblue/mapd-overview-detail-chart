@@ -19,7 +19,6 @@
   "dependencies": {
     "@mapd/connector": "git+https://github.com/mapd/mapd-connector.git",
     "@mapd/crossfilter": "git+https://github.com/mapd/mapd-crossfilter.git",
-    "@mapd/mapdc": "git+https://github.com/mapd/mapd-charting.git",
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
